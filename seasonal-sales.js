@@ -17,14 +17,10 @@ function failProducts() {
 function loadCatergories() {
   let data = JSON.parse(this.response);
   categories = data.categories;
-
-  for (var i = 0, len = categories.length; i < len; i++) {
-      lookupCategories[categories[i].id] = categories[i];
-  }
-  console.log(lookupCategories);
+  //Setting category on first load to default of first category in array
   selectedCategory = categories[0];
-  updatePrices(products);
   injectCategories();
+  updatePrices(products);
 }
 
 function failCategories() {
@@ -53,33 +49,33 @@ function injectCategories() {
 function displayProducts(currentProducts) {
   let outputProducts = currentProducts.map((product)=> {
     let category_id = selectedCategory.id;
-    let category = lookupCategories[category_id];
+    let category = getProductCategory(product.category_id);
     return `
       <div class="wrapper">
-      <div class="product">
-      <div class="product-name">${product.name}</div>
-      <div class="product-details">
-        <div>Originial: <s>${product.price}</s></div>
-        <div>Sale Price: <span class="sale-price">${product.discountedPrice}</span></div>
-        <div class="product-category"><small>Category: ${lookupCategories[product.category_id].name}<small></div>
-      </div>
-        <div class="ribbon-wrapper-red"><div class="ribbon-red">${category.discount * 100}% off</div></div>
+        <div class="product">
+          <div class="product-name">${product.name}</div>
+          <div class="product-details">
+            <div>Originial: <s>${product.price}</s></div>
+            <div>Sale Price: <span class="sale-price">${product.discountedPrice}</span></div>
+            <div class="product-category"><small>Category: ${category.name}<small></div>
+          </div>
+          <div class="ribbon-wrapper-red"><div class="ribbon-red">${selectedCategory.discount * 100}% off</div></div>
        </div>​
-
     </div>`;
   }).join("");
   productDiv.innerHTML = outputProducts;
 }
 
 function getSelectedCategory() {
-  let selectedValue = seasonsSelect.value;
-  for (var i = 0; i < categories.length; i++) {
-    if(categories[i].season_discount === selectedValue){
-      selectedCategory = categories[i];
-      break;
-    }
-  }
-  return selectedCategory;
+  return categories.find((category) => {
+      return category.season_discount === seasonsSelect.value;
+  });
+}
+
+function getProductCategory (pCategoryId) {
+  return categories.find((category) => {
+      return category.id === pCategoryId;
+  });
 }
 
 function updatePrices() {
